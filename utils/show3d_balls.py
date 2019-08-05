@@ -101,7 +101,7 @@ def showpoints(xyz,c_gt=None, c_pred = None ,waittime=0,showrot=False,magnifyBlu
         if changed:
             render()
             changed=False
-        cv2.imshow('show3d',show)
+        #cv2.imshow('show3d',show)
         if waittime==0:
             cmd=cv2.waitKey(10)%256
         else:
