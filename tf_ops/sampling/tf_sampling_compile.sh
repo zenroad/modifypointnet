@@ -13,15 +13,9 @@
 # TF1.14
 #g++ -std=c++11 tf_sampling.cpp tf_sampling_g.cu.o -o tf_sampling_so.so -shared -fPIC -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -I /usr/local/cuda-10.0/include -lcudart -L /usr/local/cuda-10.0/lib64/ -O2 -D_GLIBCXX_USE_CXX11_ABI=0
 
-CUDA_ROOT=/usr/local/cuda-10.0
-TF_INC=$(python -c 'import tensorflow as tf; print(tf.sysconfig.get_include())')
-TF_LIB=$(python -c 'import tensorflow as tf; print(tf.sysconfig.get_lib())')
+/usr/local/cuda/bin/nvcc --gpu-architecture=sm_35 --compiler-options -Wall -I/usr/local/cuda/include -L/usr/local/cuda/lib tf_sampling_g.cu -o tf_sampling_g.cu.o -c -O2 -DGOOGLE_CUDA=1 -x cu -Xcompiler -fPIC -lcusolver -lcurand -lcublas -lcusparse -g
 
-echo $CUDA_ROOT
-echo $TF_INC
-echo $TF_LIB
+TF_CFLAGS=$(python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_compile_flags()))')
+TF_LFLAGS=$(python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_link_flags()))')
 
-$CUDA_ROOT/bin/nvcc tf_sampling_g.cu -o tf_sampling_g.cu.o -c -O2 -DGOOGLE_CUDA=1 -x cu -Xcompiler -fPIC
-
-# TF>=1.4.0
-g++ -std=c++11 tf_sampling.cpp tf_sampling_g.cu.o -o tf_sampling_so.so -shared -fPIC -I$TF_INC/ -I$TF_INC/external/nsync/public -L$TF_LIB  -I$CUDA_ROOT/include -lcudart -L$CUDA_ROOT/lib64/ -O2 
+g++ -std=c++11 -shared tf_sampling.cpp tf_sampling_g.cu.o -o tf_sampling_so.so -fPIC ${TF_CFLAGS[@]} ${TF_LFLAGS[@]} -I /usr/local/cuda/include -lcudart -L /usr/local/cuda/lib -O2 -D_GLIBCXX_USE_CXX11_ABI=0 -lcusolver -g
